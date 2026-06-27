@@ -1,7 +1,7 @@
 // app/turno/nuevo.tsx
 import { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -91,7 +91,7 @@ export default function NuevoTurnoScreen() {
     await guardarInventarioInicial(inventarioItems);
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/(tabs)/index');;
+    router.replace('/(tabs)' as any);
   };
 
   if (productos.length === 0) {
@@ -131,29 +131,15 @@ export default function NuevoTurnoScreen() {
                 <Text style={styles.itemNombre}>{item.productoNombre}</Text>
                 <Text style={styles.itemPrecio}>${item.productoPrecio.toFixed(2)}</Text>
               </View>
-              <View style={styles.cantidadWrapper}>
-                <TouchableOpacity
-                  style={styles.cantBtn}
-                  onPress={() => {
-                    const current = parseFloat(item.cantidad) || 0;
-                    if (current > 0) updateCantidad(item.productoId, String(current - 1));
-                  }}
-                >
-                  <Ionicons name="remove" size={18} color={palette.textPrimary} />
-                </TouchableOpacity>
-                <Text style={styles.cantidadText}>
-                  {item.cantidad === '' ? '0' : item.cantidad}
-                </Text>
-                <TouchableOpacity
-                  style={styles.cantBtn}
-                  onPress={() => {
-                    const current = parseFloat(item.cantidad) || 0;
-                    updateCantidad(item.productoId, String(current + 1));
-                  }}
-                >
-                  <Ionicons name="add" size={18} color={palette.textPrimary} />
-                </TouchableOpacity>
-              </View>
+              <TextInput
+                style={styles.cantidadInput}
+                value={item.cantidad}
+                onChangeText={(val) => updateCantidad(item.productoId, val)}
+                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor={palette.textMuted}
+                selectTextOnFocus
+              />
             </View>
           </Card>
         ))}
@@ -208,28 +194,18 @@ const styles = StyleSheet.create({
     color: palette.accent,
     fontWeight: '500',
   },
-  cantidadWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  cantidadInput: {
+    width: 80,
+    height: 44,
     backgroundColor: palette.surface2,
     borderRadius: borderRadius.md,
-    padding: spacing.xs,
-  },
-  cantBtn: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: palette.surface3,
-    borderRadius: borderRadius.sm,
-  },
-  cantidadText: {
+    borderWidth: 1,
+    borderColor: palette.surface3,
+    color: palette.textPrimary,
     fontSize: fontSize.md,
     fontWeight: '700',
-    color: palette.textPrimary,
-    minWidth: 32,
     textAlign: 'center',
+    paddingHorizontal: spacing.sm,
   },
   iniciarBtn: {
     marginTop: spacing.md,
