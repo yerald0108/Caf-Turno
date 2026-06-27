@@ -6,7 +6,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useMovimientosStore, useProductoStore } from '../../src/store';
 import { ScreenHeader, Card, Button, AppTextInput } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -34,7 +33,6 @@ export default function SalidaFamiliarModal() {
   }, []);
 
   const toggleProducto = (productoId: string, productoNombre: string) => {
-    Haptics.selectionAsync();
     const existe = itemsSeleccionados.find((i) => i.productoId === productoId);
     if (existe) {
       setItemsSeleccionados((prev) => prev.filter((i) => i.productoId !== productoId));
@@ -68,7 +66,7 @@ export default function SalidaFamiliarModal() {
     const items: SalidaFamiliarItem[] = itemsSeleccionados.map((i) => ({
       productoId: i.productoId,
       productoNombre: i.productoNombre,
-      cantidad: i.cantidad,
+        cantidad: i.cantidad,
     }));
 
     const salida: SalidaFamiliar = {
@@ -81,8 +79,10 @@ export default function SalidaFamiliarModal() {
     };
 
     await agregarSalidaFamiliar(salida);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    setPersona('');
+    setItemsSeleccionados([]);
+    setNotas('');
+    setSaving(false);
   };
 
   return (
@@ -169,8 +169,15 @@ export default function SalidaFamiliarModal() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
@@ -192,7 +199,9 @@ const styles = StyleSheet.create({
     borderColor: palette.info,
     backgroundColor: palette.infoDim,
   },
-  productoItemInfo: { flex: 1 },
+  productoItemInfo: { 
+    flex: 1 
+  },
   productoItemNombre: {
     fontSize: fontSize.base,
     fontWeight: '600',
@@ -225,5 +234,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  saveBtn: { marginTop: spacing.sm },
+  saveBtn: { 
+    marginTop: spacing.sm 
+  },
 });

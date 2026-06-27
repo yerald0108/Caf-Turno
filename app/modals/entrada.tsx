@@ -1,27 +1,39 @@
 // app/modals/entrada.tsx
 import { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useMovimientosStore, useProductoStore } from '../../src/store';
 import { ScreenHeader, Card, Button, AppTextInput } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
-import { EntradaProducto } from '../../src/domain/entities';
+import { EntradaProducto, Producto, InventarioItem } from '../../src/domain/entities';
 import { generateId } from '../../src/data/database/uuid';
+import { ProductoRepository, TurnoRepository } from '../../src/data/repositories';
+
+const productoRepo = new ProductoRepository();
+const turnoRepo = new TurnoRepository();
+
+type Modo = 'existente' | 'nuevo';
 
 export default function EntradaModal() {
-  const { turnoActivo } = useTurnoStore();
+  const { turnoActivo, inventarioInicial, cargarInventarioInicial } = useTurnoStore();
   const { agregarEntrada } = useMovimientosStore();
   const { productos, cargarProductos } = useProductoStore();
 
+  const [modo, setModo] = useState<Modo>('existente');
   const [productoSeleccionado, setProductoSeleccionado] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState('');
   const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
+  const [registradas, setRegistradas] = useState<EntradaProducto[]>([]);
+
+  // Campos para nuevo producto
+  const [nuevoNombre, setNuevoNombre] = useState('');
+  const [nuevoPrecio, setNuevoPrecio] = useState('');
+  const [nuevaCategoria, setNuevaCategoria] = useState('');
+  const [nuevaCantidadInicial, setNuevaCantidadInicial] = useState('');
 
   useEffect(() => {
     cargarProductos();
@@ -29,10 +41,10 @@ export default function EntradaModal() {
 
   const producto = productos.find((p) => p.id === productoSeleccionado);
 
-  const handleGuardar = async () => {
+  const handleGuardarExistente = async () => {
     if (!turnoActivo) return;
     if (!productoSeleccionado || !producto) {
-      Alert.alert('Selecciona un producto', 'Debes elegir un producto para registrar la entrada.');
+      Alert.alert('Selecciona un producto');
       return;
     }
     const cantNum = parseFloat(cantidad);
@@ -54,8 +66,77 @@ export default function EntradaModal() {
     };
 
     await agregarEntrada(entrada);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    setRegistradas((prev) => [entrada, ...prev]);
+    setProductoSeleccionado(null);
+    setCantidad('');
+    setNotas('');
+    setSaving(false);
+  };
+
+  const handleGuardarNuevo = async () => {
+    if (!turnoActivo) return;
+    if (!nuevoNombre.trim()) {
+      Alert.alert('Nombre requerido', 'Escribe el nombre del producto.');
+      return;
+    }
+    const precioNum = parseFloat(nuevoPrecio);
+    if (isNaN(precioNum) || precioNum <= 0) {
+      Alert.alert('Precio inválido', 'Ingresa un precio válido.');
+      return;
+    }
+    const cantInicialNum = parseFloat(nuevaCantidadInicial) || 0;
+    const cantEntradaNum = parseFloat(cantidad) || 0;
+
+    setSaving(true);
+
+    // Crear el producto en el catálogo
+    const nuevoProducto: Producto = {
+      id: generateId(),
+      nombre: nuevoNombre.trim(),
+      precio: precioNum,
+      categoria: nuevaCategoria.trim() || undefined,
+    };
+    await productoRepo.guardar(nuevoProducto);
+
+    // Agregarlo al inventario inicial del turno
+    const itemInicial: InventarioItem = {
+      id: generateId(),
+      turnoId: turnoActivo.id,
+      productoId: nuevoProducto.id,
+      productoNombre: nuevoProducto.nombre,
+      productoPrecio: nuevoProducto.precio,
+      cantidad: cantInicialNum,
+      tipo: 'inicial',
+    };
+    await turnoRepo.guardarInventarioItem(itemInicial);
+
+    // Si además entra cantidad ahora, registrar como entrada
+    if (cantEntradaNum > 0) {
+      const entrada: EntradaProducto = {
+        id: generateId(),
+        turnoId: turnoActivo.id,
+        productoId: nuevoProducto.id,
+        productoNombre: nuevoProducto.nombre,
+        productoPrecio: nuevoProducto.precio,
+        cantidad: cantEntradaNum,
+        fecha: new Date().toISOString(),
+        notas: notas.trim() || undefined,
+      };
+      await agregarEntrada(entrada);
+      setRegistradas((prev) => [entrada, ...prev]);
+    }
+
+    // Recargar inventario inicial en el store
+    await cargarInventarioInicial(turnoActivo.id);
+    await cargarProductos();
+
+    setNuevoNombre('');
+    setNuevoPrecio('');
+    setNuevaCategoria('');
+    setNuevaCantidadInicial('');
+    setCantidad('');
+    setNotas('');
+    setSaving(false);
   };
 
   return (
@@ -63,67 +144,205 @@ export default function EntradaModal() {
       <ScreenHeader title="Entrada de producto" showBack />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        <Text style={styles.sectionLabel}>Selecciona el producto</Text>
-        {productos.map((p) => (
+        {/* Selector de modo */}
+        <View style={styles.modoRow}>
           <TouchableOpacity
-            key={p.id}
-            style={[
-              styles.productoItem,
-              productoSeleccionado === p.id && styles.productoItemSelected,
-            ]}
-            onPress={() => {
-              Haptics.selectionAsync();
-              setProductoSeleccionado(p.id);
-            }}
+            style={[styles.modoBtn, modo === 'existente' && styles.modoBtnActive]}
+            onPress={() => setModo('existente')}
           >
-            <View style={styles.productoItemInfo}>
-              <Text style={styles.productoItemNombre}>{p.nombre}</Text>
-              <Text style={styles.productoItemPrecio}>${p.precio.toFixed(2)}</Text>
-            </View>
-            {productoSeleccionado === p.id && (
-              <Ionicons name="checkmark-circle" size={22} color={palette.success} />
-            )}
+            <Text style={[styles.modoBtnLabel, modo === 'existente' && styles.modoBtnLabelActive]}>
+              Producto existente
+            </Text>
           </TouchableOpacity>
-        ))}
+          <TouchableOpacity
+            style={[styles.modoBtn, modo === 'nuevo' && styles.modoBtnActive]}
+            onPress={() => setModo('nuevo')}
+          >
+            <Text style={[styles.modoBtnLabel, modo === 'nuevo' && styles.modoBtnLabelActive]}>
+              Producto nuevo
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-        <Text style={styles.sectionLabel}>Cantidad que entra</Text>
-        <Card>
-          <TextInput
-            style={styles.cantidadInput}
-            value={cantidad}
-            onChangeText={setCantidad}
-            keyboardType="decimal-pad"
-            placeholder="0"
-            placeholderTextColor={palette.textMuted}
-            selectTextOnFocus
-          />
-        </Card>
+        {/* Modo: producto existente */}
+        {modo === 'existente' && (
+          <>
+            <Text style={styles.sectionLabel}>Selecciona el producto</Text>
+            {productos.map((p) => (
+              <TouchableOpacity
+                key={p.id}
+                style={[
+                  styles.productoItem,
+                  productoSeleccionado === p.id && styles.productoItemSelected,
+                ]}
+                onPress={() => setProductoSeleccionado(p.id)}
+              >
+                <View style={styles.productoItemInfo}>
+                  <Text style={styles.productoItemNombre}>{p.nombre}</Text>
+                  <Text style={styles.productoItemPrecio}>${p.precio.toFixed(2)}</Text>
+                </View>
+                {productoSeleccionado === p.id && (
+                  <Ionicons name="checkmark-circle" size={22} color={palette.success} />
+                )}
+              </TouchableOpacity>
+            ))}
 
-        <AppTextInput
-          label="Notas (opcional)"
-          placeholder="Ej: Llegó del proveedor"
-          value={notas}
-          onChangeText={setNotas}
-          multiline
-          numberOfLines={2}
-          containerStyle={styles.notasInput}
-        />
+            <Text style={styles.sectionLabel}>Cantidad que entra</Text>
+            <Card>
+              <TextInput
+                style={styles.cantidadInput}
+                value={cantidad}
+                onChangeText={setCantidad}
+                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor={palette.textMuted}
+                selectTextOnFocus
+              />
+            </Card>
 
-        <Button
-          label="Registrar entrada"
-          onPress={handleGuardar}
-          loading={saving}
-          fullWidth
-          style={styles.saveBtn}
-        />
+            <AppTextInput
+              label="Notas (opcional)"
+              placeholder="Ej: Llegó del proveedor"
+              value={notas}
+              onChangeText={setNotas}
+              multiline
+              numberOfLines={2}
+            />
+
+            <Button
+              label="Registrar entrada"
+              onPress={handleGuardarExistente}
+              loading={saving}
+              fullWidth
+              style={styles.saveBtn}
+            />
+          </>
+        )}
+
+        {/* Modo: producto nuevo */}
+        {modo === 'nuevo' && (
+          <>
+            <Card style={styles.nuevoCard}>
+              <Text style={styles.nuevoCardTitle}>Datos del nuevo producto</Text>
+              <AppTextInput
+                label="Nombre"
+                placeholder="Ej: Café con leche"
+                value={nuevoNombre}
+                onChangeText={setNuevoNombre}
+                autoCapitalize="words"
+              />
+              <AppTextInput
+                label="Precio de venta"
+                placeholder="0.00"
+                value={nuevoPrecio}
+                onChangeText={setNuevoPrecio}
+                keyboardType="decimal-pad"
+              />
+              <AppTextInput
+                label="Categoría (opcional)"
+                placeholder="Ej: Bebidas"
+                value={nuevaCategoria}
+                onChangeText={setNuevaCategoria}
+                autoCapitalize="words"
+              />
+              <AppTextInput
+                label="Cantidad inicial en inventario"
+                placeholder="¿Cuántos había al inicio del turno?"
+                value={nuevaCantidadInicial}
+                onChangeText={setNuevaCantidadInicial}
+                keyboardType="decimal-pad"
+              />
+            </Card>
+
+            <Text style={styles.sectionLabel}>Cantidad que entra ahora (opcional)</Text>
+            <Card>
+              <TextInput
+                style={styles.cantidadInput}
+                value={cantidad}
+                onChangeText={setCantidad}
+                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor={palette.textMuted}
+                selectTextOnFocus
+              />
+            </Card>
+
+            <AppTextInput
+              label="Notas (opcional)"
+              placeholder="Observaciones"
+              value={notas}
+              onChangeText={setNotas}
+              multiline
+              numberOfLines={2}
+            />
+
+            <Button
+              label="Agregar al inventario"
+              onPress={handleGuardarNuevo}
+              loading={saving}
+              fullWidth
+              style={styles.saveBtn}
+            />
+          </>
+        )}
+
+        {/* Entradas registradas en esta sesión */}
+        {registradas.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>Registradas en esta sesión</Text>
+            {registradas.map((e) => (
+              <Card key={e.id} style={styles.registradaCard}>
+                <View style={styles.registradaRow}>
+                  <Ionicons name="checkmark-circle" size={18} color={palette.success} />
+                  <Text style={styles.registradaNombre}>{e.productoNombre}</Text>
+                  <Text style={styles.registradaCant}>+{e.cantidad}</Text>
+                </View>
+              </Card>
+            ))}
+          </>
+        )}
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
+  modoRow: {
+    flexDirection: 'row',
+    backgroundColor: palette.surface2,
+    borderRadius: borderRadius.md,
+    padding: 4,
+    gap: 4,
+  },
+  modoBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  modoBtnActive: {
+    backgroundColor: palette.surface0,
+    borderWidth: 1,
+    borderColor: palette.accent,
+  },
+  modoBtnLabel: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: palette.textMuted,
+  },
+  modoBtnLabelActive: {
+    color: palette.accent,
+  },
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
@@ -145,7 +364,9 @@ const styles = StyleSheet.create({
     borderColor: palette.success,
     backgroundColor: palette.successDim,
   },
-  productoItemInfo: { flex: 1 },
+  productoItemInfo: { 
+    flex: 1 
+  },
   productoItemNombre: {
     fontSize: fontSize.base,
     fontWeight: '600',
@@ -163,6 +384,34 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  notasInput: { marginTop: spacing.xs },
-  saveBtn: { marginTop: spacing.sm },
+  nuevoCard: { 
+    gap: spacing.md 
+  },
+  nuevoCardTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: palette.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  saveBtn: { 
+    marginTop: spacing.sm 
+  },
+  registradaCard: { 
+    marginBottom: spacing.xs 
+  },
+  registradaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  registradaNombre: {
+    flex: 1,
+    fontSize: fontSize.base,
+    color: palette.textSecondary,
+  },
+  registradaCant: {
+    fontSize: fontSize.base,
+    fontWeight: '700',
+    color: palette.success,
+  },
 });

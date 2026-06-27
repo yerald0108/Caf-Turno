@@ -1,6 +1,6 @@
 // src/data/repositories/MovimientosRepository.ts
 import { IMovimientosRepository } from '../../domain/repositories';
-import { EntradaProducto, SalidaFamiliar, Gasto, Merma } from '../../domain/entities';
+import { EntradaProducto, SalidaFamiliar, Gasto, Merma, CambioPrecio } from '../../domain/entities';
 import { getDatabase } from '../database/database';
 import { generateId } from '../database/uuid';
 
@@ -98,6 +98,28 @@ export class MovimientosRepository implements IMovimientosRepository {
     const db = getDatabase();
     return db.getAllSync<Merma>(
       `SELECT * FROM mermas WHERE turnoId = ? ORDER BY fecha DESC`,
+      [turnoId]
+    );
+  }
+
+  // ── Cambios de precio ─────────────────────────────────────
+  async guardarCambioPrecio(cambio: CambioPrecio): Promise<void> {
+    const db = getDatabase();
+    db.runSync(
+      `INSERT INTO cambios_precio
+       (id, turnoId, productoId, productoNombre, precioAnterior, precioNuevo,
+        cantidadVendidaAnterior, cantidadRestante, fecha)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [cambio.id, cambio.turnoId, cambio.productoId, cambio.productoNombre,
+       cambio.precioAnterior, cambio.precioNuevo, cambio.cantidadVendidaAnterior,
+       cambio.cantidadRestante, cambio.fecha]
+    );
+  }
+
+  async obtenerCambiosPrecio(turnoId: string): Promise<CambioPrecio[]> {
+    const db = getDatabase();
+    return db.getAllSync<CambioPrecio>(
+      `SELECT * FROM cambios_precio WHERE turnoId = ? ORDER BY fecha ASC`,
       [turnoId]
     );
   }

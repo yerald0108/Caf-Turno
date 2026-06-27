@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore } from '../../src/store';
 import { useMovimientosStore } from '../../src/store';
 import { Card, Badge } from '../../src/ui/components/common';
@@ -56,7 +55,6 @@ export default function TurnoScreen() {
           <TouchableOpacity
             style={styles.startButton}
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               router.push('/turno/nuevo');
             }}
           >
@@ -134,6 +132,13 @@ export default function TurnoScreen() {
             dimColor={palette.dangerDim}
             onPress={() => router.push('/modals/merma')}
           />
+          <ActionButton
+            icon="pricetag"
+            label="Cambio de precio"
+            color={palette.accent}
+            dimColor={palette.accentDim}
+            onPress={() => router.push('/modals/cambio-precio')}
+          />
         </View>
 
         {/* Resumen de movimientos */}
@@ -149,7 +154,6 @@ export default function TurnoScreen() {
         <TouchableOpacity
           style={styles.cerrarButton}
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             router.push('/turno/cierre');
           }}
         >
@@ -171,7 +175,6 @@ function ActionButton({
     <TouchableOpacity
       style={[styles.actionBtn, { backgroundColor: dimColor, borderColor: color + '40' }]}
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
       }}
       activeOpacity={0.75}

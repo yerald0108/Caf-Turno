@@ -1,5 +1,5 @@
 // src/domain/repositories/IMovimientosRepository.ts
-import { EntradaProducto, SalidaFamiliar, Gasto, Merma } from '../entities';
+import { EntradaProducto, SalidaFamiliar, Gasto, Merma, CambioPrecio } from '../entities';
 
 export interface IMovimientosRepository {
   // Entradas
@@ -17,4 +17,8 @@ export interface IMovimientosRepository {
   // Mermas
   guardarMerma(merma: Merma): Promise<void>;
   obtenerMermas(turnoId: string): Promise<Merma[]>;
+
+  // Cambios de precio
+  guardarCambioPrecio(cambio: CambioPrecio): Promise<void>;
+  obtenerCambiosPrecio(turnoId: string): Promise<CambioPrecio[]>;
 }

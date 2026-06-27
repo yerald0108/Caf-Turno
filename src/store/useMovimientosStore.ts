@@ -1,6 +1,6 @@
 // src/store/useMovimientosStore.ts
 import { create } from 'zustand';
-import { EntradaProducto, SalidaFamiliar, Gasto, Merma } from '../domain/entities';
+import { EntradaProducto, SalidaFamiliar, Gasto, Merma, CambioPrecio } from '../domain/entities';
 import { MovimientosRepository } from '../data/repositories';
 
 const repo = new MovimientosRepository();
@@ -10,12 +10,14 @@ interface MovimientosState {
   salidasFamiliares: SalidaFamiliar[];
   gastos: Gasto[];
   mermas: Merma[];
+  cambiosPrecio: CambioPrecio[];
 
   cargarMovimientos: (turnoId: string) => Promise<void>;
   agregarEntrada: (entrada: EntradaProducto) => Promise<void>;
   agregarSalidaFamiliar: (salida: SalidaFamiliar) => Promise<void>;
   agregarGasto: (gasto: Gasto) => Promise<void>;
   agregarMerma: (merma: Merma) => Promise<void>;
+  agregarCambioPrecio: (cambio: CambioPrecio) => Promise<void>;
 }
 
 export const useMovimientosStore = create<MovimientosState>((set, get) => ({
@@ -23,15 +25,17 @@ export const useMovimientosStore = create<MovimientosState>((set, get) => ({
   salidasFamiliares: [],
   gastos: [],
   mermas: [],
+  cambiosPrecio: [],
 
   cargarMovimientos: async (turnoId) => {
-    const [entradas, salidasFamiliares, gastos, mermas] = await Promise.all([
+    const [entradas, salidasFamiliares, gastos, mermas, cambiosPrecio] = await Promise.all([
       repo.obtenerEntradas(turnoId),
       repo.obtenerSalidasFamiliares(turnoId),
       repo.obtenerGastos(turnoId),
       repo.obtenerMermas(turnoId),
+      repo.obtenerCambiosPrecio(turnoId),
     ]);
-    set({ entradas, salidasFamiliares, gastos, mermas });
+    set({ entradas, salidasFamiliares, gastos, mermas, cambiosPrecio });
   },
 
   agregarEntrada: async (entrada) => {
@@ -52,5 +56,10 @@ export const useMovimientosStore = create<MovimientosState>((set, get) => ({
   agregarMerma: async (merma) => {
     await repo.guardarMerma(merma);
     set({ mermas: [merma, ...get().mermas] });
+  },
+
+  agregarCambioPrecio: async (cambio) => {
+    await repo.guardarCambioPrecio(cambio);
+    set({ cambiosPrecio: [...get().cambiosPrecio, cambio] });
   },
 }));

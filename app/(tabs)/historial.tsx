@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore } from '../../src/store';
 import { Card, Badge, EmptyState } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -61,7 +60,6 @@ export default function HistorialScreen() {
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push(`/turno/detalle?id=${item.id}`);
             }}
           >
@@ -110,7 +108,10 @@ export default function HistorialScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
   header: {
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,

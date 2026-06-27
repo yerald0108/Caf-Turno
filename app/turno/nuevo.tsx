@@ -6,7 +6,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useProductoStore } from '../../src/store';
 import { ScreenHeader, Card, Button } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -67,7 +66,6 @@ export default function NuevoTurnoScreen() {
     }
 
     setSaving(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     const turnoId = generateId();
     const turno: Turno = {
@@ -90,7 +88,6 @@ export default function NuevoTurnoScreen() {
 
     await guardarInventarioInicial(inventarioItems);
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.replace('/(tabs)' as any);
   };
 

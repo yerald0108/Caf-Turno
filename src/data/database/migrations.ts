@@ -82,5 +82,18 @@ export function runMigrations(): void {
       fecha           TEXT NOT NULL,
       FOREIGN KEY (turnoId) REFERENCES turnos(id)
     );
+
+    CREATE TABLE IF NOT EXISTS cambios_precio (
+      id                      TEXT PRIMARY KEY NOT NULL,
+      turnoId                 TEXT NOT NULL,
+      productoId              TEXT NOT NULL,
+      productoNombre          TEXT NOT NULL,
+      precioAnterior          REAL NOT NULL,
+      precioNuevo             REAL NOT NULL,
+      cantidadVendidaAnterior REAL NOT NULL DEFAULT 0,
+      cantidadRestante        REAL NOT NULL DEFAULT 0,
+      fecha                   TEXT NOT NULL,
+      FOREIGN KEY (turnoId) REFERENCES turnos(id)
+    );
   `);
 }

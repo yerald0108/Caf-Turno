@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useMovimientosStore } from '../../src/store';
 import { ScreenHeader, Card, Button, AppTextInput } from '../../src/ui/components/common';
 import { palette, fontSize, spacing } from '../../src/ui/theme';
@@ -42,7 +41,6 @@ export default function GastoModal() {
     };
 
     await agregarGasto(gasto);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
   };
 
@@ -98,8 +96,15 @@ export default function GastoModal() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
   previewCard: {
     alignItems: 'center',
     gap: spacing.xs,

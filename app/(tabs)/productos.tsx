@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useProductoStore } from '../../src/store';
 import { Card, EmptyState, Badge } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -50,11 +49,9 @@ export default function ProductosScreen() {
     setCategoria('');
     setShowForm(false);
     setSaving(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const handleEliminar = (producto: Producto) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Eliminar producto',
       `¿Eliminar "${producto.nombre}" del catálogo?`,
@@ -80,7 +77,6 @@ export default function ProductosScreen() {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setShowForm(!showForm);
           }}
         >

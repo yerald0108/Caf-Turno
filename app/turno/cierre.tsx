@@ -6,7 +6,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useMovimientosStore } from '../../src/store';
 import { ScreenHeader, Card, Button } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -27,8 +26,7 @@ export default function CierreScreen() {
     cerrarTurno,
   } = useTurnoStore();
 
-  const { entradas, salidasFamiliares, gastos, mermas, cargarMovimientos } = useMovimientosStore();
-
+  const { entradas, salidasFamiliares, gastos, mermas, cambiosPrecio, cargarMovimientos } = useMovimientosStore();
   const [cantidadesFinales, setCantidadesFinales] = useState<Record<string, string>>({});
   const [paso, setPaso] = useState<'inventario' | 'resumen'>('inventario');
   const [resumen, setResumen] = useState<ReturnType<typeof calcularResumenTurno> | null>(null);
@@ -53,7 +51,6 @@ export default function CierreScreen() {
   const handleCalcular = async () => {
     if (!turnoActivo) return;
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     // Guardar inventario final en la BD
     const itemsFinales: InventarioItem[] = inventarioInicial.map((item) => ({
@@ -83,6 +80,7 @@ export default function CierreScreen() {
       salidasFamiliares,
       gastos,
       mermas,
+      cambiosPrecio,
     });
 
     setResumen(calc);
@@ -100,7 +98,6 @@ export default function CierreScreen() {
           style: 'destructive',
           onPress: async () => {
             setCerrando(true);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await cerrarTurno();
             router.replace('/(tabs)' as any);
           },

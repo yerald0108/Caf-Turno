@@ -29,7 +29,7 @@ export default function DetalleTurnoScreen() {
     const turno = turnos.find((t) => t.id === turnoId);
     if (!turno) return;
 
-    const [inventarioInicial, inventarioFinal, entradas, salidasFamiliares, gastos, mermas] =
+    const [inventarioInicial, inventarioFinal, entradas, salidasFamiliares, gastos, mermas, cambiosPrecio] =
       await Promise.all([
         turnoRepo.obtenerInventario(turnoId, 'inicial'),
         turnoRepo.obtenerInventario(turnoId, 'final'),
@@ -37,6 +37,7 @@ export default function DetalleTurnoScreen() {
         movRepo.obtenerSalidasFamiliares(turnoId),
         movRepo.obtenerGastos(turnoId),
         movRepo.obtenerMermas(turnoId),
+        movRepo.obtenerCambiosPrecio(turnoId),
       ]);
 
     const calc = calcularResumenTurno({
@@ -49,6 +50,7 @@ export default function DetalleTurnoScreen() {
       salidasFamiliares,
       gastos,
       mermas,
+      cambiosPrecio,
     });
 
     setResumen(calc);

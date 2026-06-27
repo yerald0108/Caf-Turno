@@ -8,3 +8,4 @@ export type { SalidaFamiliar, SalidaFamiliarItem } from './SalidaFamiliar';
 export type { Gasto } from './Gasto';
 export type { Merma, MotivoMerma } from './Merma';
 export type { ResumenTurno, ResumenProducto } from './ResumenTurno';
+export type { CambioPrecio } from './CambioPrecio';

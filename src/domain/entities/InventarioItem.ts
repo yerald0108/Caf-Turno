@@ -6,8 +6,8 @@ export interface InventarioItem {
   id: string;
   turnoId: string;
   productoId: string;
-  productoNombre: string;   // desnormalizado para mostrarlo sin joins
-  productoPrecio: number;   // precio al momento del turno
+  productoNombre: string;
+  productoPrecio: number;
   cantidad: number;
   tipo: TipoInventario;
 }

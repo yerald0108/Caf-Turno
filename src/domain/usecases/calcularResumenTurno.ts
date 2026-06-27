@@ -5,6 +5,7 @@ import {
   SalidaFamiliar,
   Gasto,
   Merma,
+  CambioPrecio,
   ResumenTurno,
   ResumenProducto,
 } from '../entities';
@@ -19,13 +20,14 @@ interface CalcularResumenParams {
   salidasFamiliares: SalidaFamiliar[];
   gastos: Gasto[];
   mermas: Merma[];
+  cambiosPrecio: CambioPrecio[];
 }
 
 export function calcularResumenTurno(params: CalcularResumenParams): ResumenTurno {
   const {
     turnoId, fechaInicio, fechaCierre,
     inventarioInicial, inventarioFinal,
-    entradas, salidasFamiliares, gastos, mermas,
+    entradas, salidasFamiliares, gastos, mermas, cambiosPrecio,
   } = params;
 
   const productos: ResumenProducto[] = inventarioInicial.map((itemInicial) => {
@@ -39,7 +41,6 @@ export function calcularResumenTurno(params: CalcularResumenParams): ResumenTurn
       .filter((m) => m.productoId === productoId)
       .reduce((sum, m) => sum + m.cantidad, 0);
 
-    // Salidas familiares: salen del inventario pero NO generan ingreso en caja
     const cantSalidas = salidasFamiliares
       .flatMap((s) => s.items)
       .filter((i) => i.productoId === productoId)
@@ -48,16 +49,30 @@ export function calcularResumenTurno(params: CalcularResumenParams): ResumenTurn
     const itemFinal = inventarioFinal.find((i) => i.productoId === productoId);
     const cantFinal = itemFinal?.cantidad ?? 0;
 
-    // Vendido con ingreso = total consumido - salidas familiares - mermas
-    // Es decir: solo lo que realmente se vendió y debe estar en caja
     const totalConsumido = Math.max(0, cantInicial + cantEntradas - cantFinal);
     const cantidadVendida = Math.max(0, totalConsumido - cantSalidas - cantMermas);
-    const totalVentas = cantidadVendida * productoPrecio;
+
+    // Verificar si hubo cambio de precio para este producto
+    const cambio = cambiosPrecio.find((c) => c.productoId === productoId);
+
+    let totalVentas = 0;
+    if (cambio) {
+      // Ventas al precio anterior (ingresadas manualmente)
+      totalVentas += cambio.cantidadVendidaAnterior * cambio.precioAnterior;
+      // Ventas restantes al precio nuevo
+      const vendidoAlNuevoPrecio = Math.max(
+        0,
+        cantidadVendida - cambio.cantidadVendidaAnterior
+      );
+      totalVentas += vendidoAlNuevoPrecio * cambio.precioNuevo;
+    } else {
+      totalVentas = cantidadVendida * productoPrecio;
+    }
 
     return {
       productoId,
       productoNombre,
-      precioUnitario: productoPrecio,
+      precioUnitario: cambio ? cambio.precioNuevo : productoPrecio,
       cantidadInicial: cantInicial,
       cantidadEntradas: cantEntradas,
       cantidadFinal: cantFinal,

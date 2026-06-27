@@ -6,7 +6,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTurnoStore, useMovimientosStore, useProductoStore } from '../../src/store';
 import { ScreenHeader, Card, Button, AppTextInput } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -64,8 +63,11 @@ export default function MermaModal() {
     };
 
     await agregarMerma(merma);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    setProductoSeleccionado(null);
+    setCantidad('1');
+    setMotivo(null);
+    setDescripcion('');
+    setSaving(false);
   };
 
   return (
@@ -82,7 +84,6 @@ export default function MermaModal() {
               productoSeleccionado === p.id && styles.productoItemSelected,
             ]}
             onPress={() => {
-              Haptics.selectionAsync();
               setProductoSeleccionado(p.id);
             }}
           >
@@ -116,7 +117,6 @@ export default function MermaModal() {
                 motivo === m.value && { borderColor: m.color, backgroundColor: m.color + '18' },
               ]}
               onPress={() => {
-                Haptics.selectionAsync();
                 setMotivo(m.value);
               }}
             >
@@ -159,8 +159,15 @@ export default function MermaModal() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',

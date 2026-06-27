@@ -1,6 +1,5 @@
 // src/ui/components/common/Button.tsx
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { palette, fontSize, borderRadius, spacing } from '../../theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
@@ -25,7 +24,6 @@ export function Button({
   style,
 }: ButtonProps) {
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
 
