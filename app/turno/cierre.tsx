@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTurnoStore, useMovimientosStore } from '../../src/store';
-import { ScreenHeader, Card, Button } from '../../src/ui/components/common';
+import { ScreenHeader, Card, Button, AnimatedNumber } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
 import { InventarioItem } from '../../src/domain/entities';
 import { calcularResumenTurno } from '../../src/domain/usecases/calcularResumenTurno';
@@ -181,9 +181,12 @@ export default function CierreScreen() {
           {/* Saldo esperado — el número principal */}
           <Card style={styles.saldoCard} elevated>
             <Text style={styles.saldoLabel}>Saldo esperado en caja</Text>
-            <Text style={styles.saldoMonto}>
-              ${resumen.saldoEsperadoCaja.toFixed(2)}
-            </Text>
+            <AnimatedNumber
+              value={resumen.saldoEsperadoCaja}
+              prefix="$"
+              style={styles.saldoMonto}
+              duration={1000}
+            />
             <View style={styles.saldoDesglose}>
               <View style={styles.saldoItem}>
                 <Text style={styles.saldoItemLabel}>Ventas brutas</Text>
@@ -274,6 +277,29 @@ export default function CierreScreen() {
                       <Text style={styles.gastoDesc}>{s.persona}</Text>
                       <Text style={styles.salidaItems}>
                         {s.items.map((i) => `${i.productoNombre} x${i.cantidad}`).join(', ')}
+                      </Text>
+                    </View>
+                  </View>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {/* Cambios de precio */}
+          {cambiosPrecio.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>Cambios de precio</Text>
+              {cambiosPrecio.map((c) => (
+                <Card key={c.id} style={styles.gastoCard}>
+                  <View style={styles.gastoRow}>
+                    <Ionicons name="pricetag-outline" size={18} color={palette.accent} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.gastoDesc}>{c.productoNombre}</Text>
+                      <Text style={styles.cambioDetalle}>
+                        ${c.precioAnterior.toFixed(2)} → ${c.precioNuevo.toFixed(2)}
+                      </Text>
+                      <Text style={styles.cambioDetalle}>
+                        {c.cantidadVendidaAnterior} uds al precio anterior · {c.cantidadRestante} uds al precio nuevo
                       </Text>
                     </View>
                   </View>
@@ -506,5 +532,10 @@ const styles = StyleSheet.create({
   volverLabel: {
     fontSize: fontSize.sm,
     color: palette.textSecondary,
+  },
+  cambioDetalle: {
+    fontSize: fontSize.xs,
+    color: palette.textMuted,
+    marginTop: 2,
   },
 });

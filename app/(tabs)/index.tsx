@@ -1,6 +1,7 @@
 // app/(tabs)/index.tsx
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { useFadeIn } from '../../src/ui/hooks/useFadeIn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +13,7 @@ import { palette, fontSize, spacing, borderRadius, shadow } from '../../src/ui/t
 export default function TurnoScreen() {
   const { turnoActivo, inventarioInicial, cargarTurnoActivo, cargarInventarioInicial } = useTurnoStore();
   const { entradas, gastos, salidasFamiliares, mermas, cargarMovimientos } = useMovimientosStore();
+  const { opacity: fadeOpacity, translateY: fadeY } = useFadeIn(400);
 
   useEffect(() => {
     cargarTurnoActivo();
@@ -41,24 +43,30 @@ export default function TurnoScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>CaféTurno</Text>
+          <View>
+            <Text style={styles.headerTitle}>CaféTurno</Text>
+            <Text style={styles.headerSub}>Bienvenido</Text>
+          </View>
           <Badge label="Sin turno" variant="neutral" />
         </View>
         <View style={styles.emptyTurno}>
-          <View style={styles.emptyIconWrapper}>
-            <Ionicons name="storefront-outline" size={48} color={palette.textMuted} />
+          <View style={styles.emptyIconRing}>
+            <View style={styles.emptyIconInner}>
+              <Ionicons name="storefront-outline" size={40} color={palette.accent} />
+            </View>
           </View>
-          <Text style={styles.emptyTitle}>No hay turno activo</Text>
-          <Text style={styles.emptyDesc}>
-            Inicia un nuevo turno para comenzar a registrar el inventario de tu cafetería.
-          </Text>
+          <View style={styles.emptyTexts}>
+            <Text style={styles.emptyTitle}>Sin turno activo</Text>
+            <Text style={styles.emptyDesc}>
+              Inicia un nuevo turno para comenzar a registrar el inventario de tu cafetería.
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.startButton}
-            onPress={() => {
-              router.push('/turno/nuevo');
-            }}
+            onPress={() => router.push('/turno/nuevo')}
+            activeOpacity={0.85}
           >
-            <Ionicons name="play-circle" size={22} color={palette.textInverse} />
+            <Ionicons name="play-circle" size={20} color={palette.textInverse} />
             <Text style={styles.startButtonLabel}>Iniciar turno</Text>
           </TouchableOpacity>
         </View>
@@ -78,89 +86,98 @@ export default function TurnoScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <Animated.View style={{ opacity: fadeOpacity, transform: [{ translateY: fadeY }] }}>
+          {/* Info del turno */}
+          <Card style={styles.turnoCard} elevated>
+            <View style={styles.turnoCardRow}>
+              <View style={styles.turnoCardItem}>
+                <Text style={styles.turnoCardLabel}>Inicio</Text>
+                <Text style={styles.turnoCardValue}>{formatHora(turnoActivo.fechaInicio)}</Text>
+              </View>
+              <View style={styles.turnoCardDivider} />
+              <View style={styles.turnoCardItem}>
+                <Text style={styles.turnoCardLabel}>Productos</Text>
+                <Text style={styles.turnoCardValue}>{inventarioInicial.length}</Text>
+              </View>
+              <View style={styles.turnoCardDivider} />
+              <View style={styles.turnoCardItem}>
+                <Text style={styles.turnoCardLabel}>Movimientos</Text>
+                <Text style={styles.turnoCardValue}>
+                  {entradas.length + salidasFamiliares.length + gastos.length + mermas.length}
+                </Text>
+              </View>
+            </View>
+          </Card>
 
-        {/* Info del turno */}
-        <Card style={styles.turnoCard} elevated>
-          <View style={styles.turnoCardRow}>
-            <View style={styles.turnoCardItem}>
-              <Text style={styles.turnoCardLabel}>Inicio</Text>
-              <Text style={styles.turnoCardValue}>{formatHora(turnoActivo.fechaInicio)}</Text>
-            </View>
-            <View style={styles.turnoCardDivider} />
-            <View style={styles.turnoCardItem}>
-              <Text style={styles.turnoCardLabel}>Productos</Text>
-              <Text style={styles.turnoCardValue}>{inventarioInicial.length}</Text>
-            </View>
-            <View style={styles.turnoCardDivider} />
-            <View style={styles.turnoCardItem}>
-              <Text style={styles.turnoCardLabel}>Movimientos</Text>
-              <Text style={styles.turnoCardValue}>
-                {entradas.length + salidasFamiliares.length + gastos.length + mermas.length}
-              </Text>
-            </View>
+          <TouchableOpacity
+            style={styles.inventarioBtn}
+            onPress={() => router.push('/turno/inventario-inicial')}
+          >
+            <Ionicons name="list-outline" size={18} color={palette.textSecondary} />
+            <Text style={styles.inventarioBtnLabel}>Ver inventario inicial</Text>
+            <Ionicons name="chevron-forward" size={16} color={palette.textMuted} />
+          </TouchableOpacity>
+
+          {/* Acciones rápidas */}
+          <Text style={styles.sectionTitle}>Registrar movimiento</Text>
+          <View style={styles.actionsGrid}>
+            <ActionButton
+              icon="arrow-down-circle"
+              label="Entrada"
+              color={palette.success}
+              dimColor={palette.successDim}
+              onPress={() => router.push('/modals/entrada')}
+            />
+            <ActionButton
+              icon="people"
+              label="Salida familiar"
+              color={palette.info}
+              dimColor={palette.infoDim}
+              onPress={() => router.push('/modals/salida-familiar')}
+            />
+            <ActionButton
+              icon="cash"
+              label="Gasto"
+              color={palette.warning}
+              dimColor={palette.warningDim}
+              onPress={() => router.push('/modals/gasto')}
+            />
+            <ActionButton
+              icon="warning"
+              label="Merma"
+              color={palette.danger}
+              dimColor={palette.dangerDim}
+              onPress={() => router.push('/modals/merma')}
+            />
+            <ActionButton
+              icon="pricetag"
+              label="Cambio de precio"
+              color={palette.accent}
+              dimColor={palette.accentDim}
+              onPress={() => router.push('/modals/cambio-precio')}
+            />
           </View>
-        </Card>
 
-        {/* Acciones rápidas */}
-        <Text style={styles.sectionTitle}>Registrar movimiento</Text>
-        <View style={styles.actionsGrid}>
-          <ActionButton
-            icon="arrow-down-circle"
-            label="Entrada"
-            color={palette.success}
-            dimColor={palette.successDim}
-            onPress={() => router.push('/modals/entrada')}
-          />
-          <ActionButton
-            icon="people"
-            label="Salida familiar"
-            color={palette.info}
-            dimColor={palette.infoDim}
-            onPress={() => router.push('/modals/salida-familiar')}
-          />
-          <ActionButton
-            icon="cash"
-            label="Gasto"
-            color={palette.warning}
-            dimColor={palette.warningDim}
-            onPress={() => router.push('/modals/gasto')}
-          />
-          <ActionButton
-            icon="warning"
-            label="Merma"
-            color={palette.danger}
-            dimColor={palette.dangerDim}
-            onPress={() => router.push('/modals/merma')}
-          />
-          <ActionButton
-            icon="pricetag"
-            label="Cambio de precio"
-            color={palette.accent}
-            dimColor={palette.accentDim}
-            onPress={() => router.push('/modals/cambio-precio')}
-          />
-        </View>
+          {/* Resumen de movimientos */}
+          <Text style={styles.sectionTitle}>Resumen del turno</Text>
+          <Card style={styles.resumenCard}>
+            <ResumenRow icon="arrow-down-circle" label="Entradas" value={entradas.length} color={palette.success} />
+            <ResumenRow icon="people" label="Salidas familiares" value={salidasFamiliares.length} color={palette.info} />
+            <ResumenRow icon="cash" label="Gastos" value={`$${gastos.reduce((a, g) => a + g.monto, 0).toFixed(2)}`} color={palette.warning} />
+            <ResumenRow icon="warning" label="Mermas" value={mermas.length} color={palette.danger} />
+          </Card>
 
-        {/* Resumen de movimientos */}
-        <Text style={styles.sectionTitle}>Resumen del turno</Text>
-        <Card style={styles.resumenCard}>
-          <ResumenRow icon="arrow-down-circle" label="Entradas" value={entradas.length} color={palette.success} />
-          <ResumenRow icon="people" label="Salidas familiares" value={salidasFamiliares.length} color={palette.info} />
-          <ResumenRow icon="cash" label="Gastos" value={`$${gastos.reduce((a, g) => a + g.monto, 0).toFixed(2)}`} color={palette.warning} />
-          <ResumenRow icon="warning" label="Mermas" value={mermas.length} color={palette.danger} />
-        </Card>
-
-        {/* Cerrar turno */}
-        <TouchableOpacity
-          style={styles.cerrarButton}
-          onPress={() => {
-            router.push('/turno/cierre');
-          }}
-        >
-          <Ionicons name="stop-circle" size={20} color={palette.danger} />
-          <Text style={styles.cerrarLabel}>Cerrar turno</Text>
-        </TouchableOpacity>
-
+          {/* Cerrar turno */}
+          <TouchableOpacity
+            style={styles.cerrarButton}
+            onPress={() => {
+              router.push('/turno/cierre');
+            }}
+          >
+            <Ionicons name="stop-circle" size={20} color={palette.danger} />
+            <Text style={styles.cerrarLabel}>Cerrar turno</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -374,5 +391,44 @@ const styles = StyleSheet.create({
     fontSize: fontSize.base,
     fontWeight: '600',
     color: palette.danger,
+  },
+  inventarioBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: palette.surface1,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: palette.surface3,
+    padding: spacing.base,
+  },
+  inventarioBtnLabel: {
+    flex: 1,
+    fontSize: fontSize.base,
+    fontWeight: '500',
+    color: palette.textSecondary,
+  },
+  emptyIconRing: {
+  width: 120,
+  height: 120,
+  borderRadius: 60,
+  borderWidth: 1,
+  borderColor: palette.accent + '30',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: palette.accentDim,
+},
+  emptyIconInner: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: palette.accent + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTexts: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
 });

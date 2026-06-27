@@ -9,7 +9,7 @@ import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
 import { TurnoRepository } from '../../src/data/repositories';
 import { MovimientosRepository } from '../../src/data/repositories';
 import { calcularResumenTurno } from '../../src/domain/usecases/calcularResumenTurno';
-import { ResumenTurno } from '../../src/domain/entities';
+import { ResumenTurno, CambioPrecio } from '../../src/domain/entities';
 
 const turnoRepo = new TurnoRepository();
 const movRepo = new MovimientosRepository();
@@ -17,6 +17,7 @@ const movRepo = new MovimientosRepository();
 export default function DetalleTurnoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [resumen, setResumen] = useState<ResumenTurno | null>(null);
+  const [cambiosPrecio, setCambiosPrecio] = useState<CambioPrecio[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function DetalleTurnoScreen() {
     });
 
     setResumen(calc);
+    setCambiosPrecio(cambiosPrecio);
     setLoading(false);
   };
 
@@ -170,16 +172,37 @@ export default function DetalleTurnoScreen() {
           <>
             <Text style={styles.sectionLabel}>Gastos</Text>
             <Card style={styles.listaCard}>
-              {resumen.productos.length > 0 && (
-                <View style={styles.totalRow}>
-                  <Ionicons name="cash-outline" size={18} color={palette.warning} />
-                  <Text style={styles.totalLabel}>Total gastos</Text>
-                  <Text style={[styles.totalValue, { color: palette.warning }]}>
-                    -${resumen.totalGastos.toFixed(2)}
-                  </Text>
-                </View>
-              )}
+              <View style={styles.totalRow}>
+                <Ionicons name="cash-outline" size={18} color={palette.warning} />
+                <Text style={styles.totalLabel}>Total gastos</Text>
+                <Text style={[styles.totalValue, { color: palette.warning }]}>
+                  -${resumen.totalGastos.toFixed(2)}
+                </Text>
+              </View>
             </Card>
+          </>
+        )}
+
+        {/* Cambios de precio */}
+        {cambiosPrecio.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>Cambios de precio</Text>
+            {cambiosPrecio.map((c) => (
+              <Card key={c.id} style={styles.listaCard}>
+                <View style={styles.totalRow}>
+                  <Ionicons name="pricetag-outline" size={18} color={palette.accent} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.totalLabel}>{c.productoNombre}</Text>
+                    <Text style={styles.cambioDetalle}>
+                      ${c.precioAnterior.toFixed(2)} → ${c.precioNuevo.toFixed(2)}
+                    </Text>
+                    <Text style={styles.cambioDetalle}>
+                      {c.cantidadVendidaAnterior} uds al precio anterior · {c.cantidadRestante} uds al precio nuevo
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            ))}
           </>
         )}
 
@@ -302,4 +325,9 @@ const styles = StyleSheet.create({
   },
   totalLabel: { flex: 1, fontSize: fontSize.base, color: palette.textSecondary },
   totalValue: { fontSize: fontSize.base, fontWeight: '700' },
+  cambioDetalle: {
+    fontSize: fontSize.xs,
+    color: palette.textMuted,
+    marginTop: 2,
+  },
 });
