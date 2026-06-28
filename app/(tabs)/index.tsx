@@ -1,5 +1,5 @@
 // app/(tabs)/index.tsx
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { useFadeIn } from '../../src/ui/hooks/useFadeIn';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -78,11 +78,16 @@ export default function TurnoScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>CaféTurno</Text>
-          <Text style={styles.headerSub}>{formatFecha(turnoActivo.fechaInicio)}</Text>
+        <View style={styles.headerLeft}>
+          <View style={styles.headerIconWrapper}>
+            <Ionicons name="storefront" size={20} color={palette.accent} />
+          </View>
+          <View>
+            <Text style={styles.headerTitle}>CaféTurno</Text>
+            <Text style={styles.headerSub}>{formatFecha(turnoActivo.fechaInicio)}</Text>
+          </View>
         </View>
-        <Badge label="Turno activo" variant="success" />
+        <Badge label="Activo" variant="success" />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -408,16 +413,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: palette.textSecondary,
   },
-  emptyIconRing: {
-  width: 120,
-  height: 120,
-  borderRadius: 60,
-  borderWidth: 1,
-  borderColor: palette.accent + '30',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: palette.accentDim,
-},
+   emptyIconRing: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 1,
+    borderColor: palette.accent + '30',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.accentDim,
+  },
   emptyIconInner: {
     width: 80,
     height: 80,
@@ -430,5 +435,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  headerIconWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: borderRadius.md,
+    backgroundColor: palette.accentDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: palette.accent + '30',
   },
 });

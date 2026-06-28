@@ -357,20 +357,39 @@ function DetalleItem({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyText: { fontSize: fontSize.base, color: palette.textSecondary },
-
-  infoCard: { borderColor: palette.info + '40', backgroundColor: palette.infoDim },
-  infoRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
+  container: { 
+    flex: 1, backgroundColor: 
+    palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
+  center: { 
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  emptyText: { 
+    fontSize: fontSize.base, 
+    color: palette.textSecondary 
+  },
+  infoCard: { 
+    borderColor: palette.info + '40', 
+    backgroundColor: palette.infoDim 
+  },
+  infoRow: { 
+    flexDirection: 'row', 
+    gap: spacing.sm, 
+    alignItems: 'flex-start' 
+  },
   infoText: {
     flex: 1,
     fontSize: fontSize.sm,
     color: palette.textSecondary,
     lineHeight: 20,
   },
-
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
@@ -379,8 +398,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginTop: spacing.xs,
   },
-
-  itemCard: { gap: spacing.sm },
+  itemCard: { 
+    gap: spacing.sm 
+  },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -420,7 +440,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  calcularBtn: { marginTop: spacing.sm },
+  calcularBtn: { 
+    marginTop: spacing.sm 
+  },
 
   // Resumen
   saldoCard: {
@@ -447,7 +469,10 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     marginTop: spacing.xs,
   },
-  saldoItem: { alignItems: 'center', gap: 2 },
+  saldoItem: { 
+    alignItems: 'center', 
+    gap: 2 
+  },
   saldoItemLabel: {
     fontSize: fontSize.xs,
     color: palette.textMuted,
@@ -456,8 +481,9 @@ const styles = StyleSheet.create({
     fontSize: fontSize.base,
     fontWeight: '700',
   },
-
-  productoCard: { gap: spacing.sm },
+  productoCard: { 
+    gap: spacing.sm 
+  },
   productoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -482,7 +508,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     padding: spacing.sm,
   },
-  detalleItem: { alignItems: 'center', minWidth: 60 },
+  detalleItem: { 
+    alignItems: 'center', 
+    minWidth: 60 
+  },
   detalleLabel: {
     fontSize: fontSize.xs,
     color: palette.textMuted,
@@ -499,7 +528,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  gastoCard: { marginBottom: spacing.xs },
+  gastoCard: { 
+    marginBottom: spacing.xs 
+  },
   gastoRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -521,7 +552,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  cerrarBtn: { marginTop: spacing.md },
+  cerrarBtn: { 
+    marginTop: spacing.md 
+  },
   volverBtn: {
     flexDirection: 'row',
     alignItems: 'center',

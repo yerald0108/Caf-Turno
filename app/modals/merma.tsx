@@ -20,7 +20,7 @@ const MOTIVOS: { value: MotivoMerma; label: string; icon: string; color: string 
 
 export default function MermaModal() {
   const { turnoActivo } = useTurnoStore();
-  const { agregarMerma } = useMovimientosStore();
+  const { agregarMerma, mermas, cargarMovimientos } = useMovimientosStore();
   const { productos, cargarProductos } = useProductoStore();
 
   const [productoSeleccionado, setProductoSeleccionado] = useState<string | null>(null);
@@ -28,6 +28,10 @@ export default function MermaModal() {
   const [motivo, setMotivo] = useState<MotivoMerma | null>(null);
   const [descripcion, setDescripcion] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (turnoActivo) cargarMovimientos(turnoActivo.id);
+  }, [turnoActivo]);
 
   useEffect(() => {
     cargarProductos();
@@ -153,6 +157,28 @@ export default function MermaModal() {
           fullWidth
           style={styles.saveBtn}
         />
+
+        {mermas.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>Mermas del turno</Text>
+            {mermas.map((m) => (
+              <Card key={m.id} style={styles.registradaCard}>
+                <View style={styles.registradaRow}>
+                  <Ionicons name="warning" size={18} color={palette.danger} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.registradaNombre}>{m.productoNombre} x{m.cantidad}</Text>
+                    <Text style={styles.registradaFecha}>
+                      {m.motivo}{m.descripcion ? ` · ${m.descripcion}` : ''}
+                    </Text>
+                  </View>
+                  <Text style={styles.registradaHora}>
+                    {new Date(m.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -221,5 +247,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: palette.textMuted,
   },
-  saveBtn: { marginTop: spacing.sm },
+  saveBtn: { 
+    marginTop: spacing.sm 
+  },
+  registradaCard: { marginBottom: spacing.xs },
+  registradaRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  registradaNombre: { fontSize: fontSize.base, fontWeight: '600', color: palette.textPrimary },
+  registradaFecha: { fontSize: fontSize.xs, color: palette.textMuted, marginTop: 2 },
+  registradaHora: { fontSize: fontSize.xs, color: palette.textMuted },
 });

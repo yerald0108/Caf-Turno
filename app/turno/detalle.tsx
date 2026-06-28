@@ -231,21 +231,43 @@ function GridItem({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
-  scroll: { padding: spacing.base, gap: spacing.md, paddingBottom: spacing['3xl'] },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { fontSize: fontSize.base, color: palette.textSecondary },
-
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
+  scroll: { 
+    padding: spacing.base, 
+    gap: spacing.md, 
+    paddingBottom: spacing['3xl'] 
+  },
+  center: { 
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  loadingText: { 
+    fontSize: fontSize.base, 
+    color: palette.textSecondary 
+  },
   horarioCard: {},
   horarioRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
   },
-  horarioItem: { alignItems: 'center', gap: spacing.xs },
-  horarioLabel: { fontSize: fontSize.xs, color: palette.textMuted },
-  horarioHora: { fontSize: fontSize.lg, fontWeight: '700', color: palette.textPrimary },
-
+  horarioItem: { 
+    alignItems: 'center', 
+    gap: spacing.xs 
+  },
+  horarioLabel: { 
+    fontSize: fontSize.xs, 
+    color: palette.textMuted 
+  },
+  horarioHora: { 
+    fontSize: fontSize.lg, 
+    fontWeight: '700', 
+    color: palette.textPrimary 
+  },
   saldoCard: {
     alignItems: 'center',
     gap: spacing.sm,
@@ -271,11 +293,23 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginTop: spacing.xs,
   },
-  saldoItem: { alignItems: 'center', gap: 2 },
-  saldoItemLabel: { fontSize: fontSize.xs, color: palette.textMuted },
-  saldoItemValue: { fontSize: fontSize.base, fontWeight: '700' },
-  saldoDivider: { width: 1, height: 32, backgroundColor: palette.surface3 },
-
+  saldoItem: { 
+    alignItems: 'center', 
+    gap: 2 
+  },
+  saldoItemLabel: { 
+    fontSize: fontSize.xs,
+    color: palette.textMuted 
+  },
+  saldoItemValue: { 
+    fontSize: fontSize.base, 
+    fontWeight: '700' 
+  },
+  saldoDivider: { 
+    width: 1, 
+    height: 32, 
+    backgroundColor: palette.surface3 
+  },
   sectionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
@@ -285,7 +319,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 
-  productoCard: { gap: spacing.sm },
+  productoCard: { 
+    gap: spacing.sm 
+  },
   productoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -308,23 +344,42 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     padding: spacing.sm,
   },
-  gridItem: { flex: 1, alignItems: 'center', gap: 2 },
-  gridLabel: { fontSize: fontSize.xs, color: palette.textMuted },
-  gridValue: { fontSize: fontSize.sm, fontWeight: '600', color: palette.textSecondary },
+  gridItem: { 
+    flex: 1, 
+    alignItems: 'center', 
+    gap: 2 
+  },
+  gridLabel: { 
+    fontSize: fontSize.xs, 
+    color: palette.textMuted 
+  },
+  gridValue: { 
+    fontSize: fontSize.sm, 
+    fontWeight: '600', 
+    color: palette.textSecondary 
+  },
   precioUnitario: {
     fontSize: fontSize.xs,
     color: palette.textMuted,
     textAlign: 'right',
   },
-
-  listaCard: { gap: spacing.sm },
+  listaCard: { 
+    gap: spacing.sm 
+  },
   totalRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  totalLabel: { flex: 1, fontSize: fontSize.base, color: palette.textSecondary },
-  totalValue: { fontSize: fontSize.base, fontWeight: '700' },
+  totalLabel: { 
+    flex: 1, 
+    fontSize: fontSize.base, 
+    color: palette.textSecondary 
+  },
+  totalValue: { 
+    fontSize: fontSize.base, 
+    fontWeight: '700' 
+  },
   cambioDetalle: {
     fontSize: fontSize.xs,
     color: palette.textMuted,

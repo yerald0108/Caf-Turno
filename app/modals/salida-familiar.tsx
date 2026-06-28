@@ -20,13 +20,16 @@ interface ItemSeleccionado {
 
 export default function SalidaFamiliarModal() {
   const { turnoActivo } = useTurnoStore();
-  const { agregarSalidaFamiliar } = useMovimientosStore();
-  const { productos, cargarProductos } = useProductoStore();
+  const { agregarSalidaFamiliar, salidasFamiliares, cargarMovimientos } = useMovimientosStore();  const { productos, cargarProductos } = useProductoStore();
 
   const [persona, setPersona] = useState('');
   const [itemsSeleccionados, setItemsSeleccionados] = useState<ItemSeleccionado[]>([]);
   const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (turnoActivo) cargarMovimientos(turnoActivo.id);
+  }, [turnoActivo]);
 
   useEffect(() => {
     cargarProductos();
@@ -163,6 +166,27 @@ export default function SalidaFamiliarModal() {
           fullWidth
           style={styles.saveBtn}
         />
+        {salidasFamiliares.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>Salidas del turno</Text>
+            {salidasFamiliares.map((s) => (
+              <Card key={s.id} style={styles.registradoCard}>
+                <View style={styles.registradoRow}>
+                  <Ionicons name="people" size={18} color={palette.info} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.registradoPersona}>{s.persona}</Text>
+                    <Text style={styles.registradoItems}>
+                      {s.items.map((i) => `${i.productoNombre} x${i.cantidad}`).join(', ')}
+                    </Text>
+                  </View>
+                  <Text style={styles.registradoHora}>
+                    {new Date(s.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -237,4 +261,9 @@ const styles = StyleSheet.create({
   saveBtn: { 
     marginTop: spacing.sm 
   },
+  registradoCard: { marginBottom: spacing.xs },
+  registradoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  registradoPersona: { fontSize: fontSize.base, fontWeight: '600', color: palette.textPrimary },
+  registradoItems: { fontSize: fontSize.sm, color: palette.textMuted, marginTop: 2 },
+  registradoHora: { fontSize: fontSize.xs, color: palette.textMuted },
 });

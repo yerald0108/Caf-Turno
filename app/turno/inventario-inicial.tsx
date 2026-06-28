@@ -94,7 +94,10 @@ export default function InventarioInicialScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.surface0 },
+  container: { 
+    flex: 1, 
+    backgroundColor: palette.surface0 
+  },
   list: {
     padding: spacing.base,
     gap: spacing.sm,

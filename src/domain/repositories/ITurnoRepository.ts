@@ -10,4 +10,5 @@ export interface ITurnoRepository {
   guardarInventarioItem(item: InventarioItem): Promise<void>;
   obtenerInventario(turnoId: string, tipo: 'inicial' | 'final'): Promise<InventarioItem[]>;
   actualizarInventarioFinal(item: InventarioItem): Promise<void>;
+  eliminarTurno(id: string): Promise<void>;
 }

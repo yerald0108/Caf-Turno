@@ -270,7 +270,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: palette.success,
   },
-  precioCard: { gap: spacing.md },
+  precioCard: { 
+    gap: spacing.md 
+  },
   precioCardTitle: {
     fontSize: fontSize.sm,
     fontWeight: '600',
@@ -309,15 +311,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  cantCard: { gap: spacing.md },
+  cantCard: { 
+    gap: spacing.md 
+  },
   cantCardTitle: {
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: palette.textSecondary,
   },
-  saveBtn: { marginTop: spacing.sm },
-  registradoCard: { marginBottom: spacing.xs },
-  registradoRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  saveBtn: { 
+    marginTop: spacing.sm 
+  },
+  registradoCard: { 
+    marginBottom: spacing.xs 
+  },
+  registradoRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: spacing.sm 
+  },
   registradoNombre: {
     fontSize: fontSize.base,
     fontWeight: '600',

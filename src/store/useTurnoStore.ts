@@ -20,6 +20,7 @@ interface TurnoState {
   cargarInventarioFinal: (turnoId: string) => Promise<void>;
   actualizarCantidadFinal: (item: InventarioItem) => Promise<void>;
   cerrarTurno: () => Promise<void>;
+  eliminarTurno: (id: string) => Promise<void>;
 }
 
 export const useTurnoStore = create<TurnoState>((set, get) => ({
@@ -76,5 +77,10 @@ export const useTurnoStore = create<TurnoState>((set, get) => ({
     const fechaCierre = new Date().toISOString();
     await repo.cerrarTurno(turnoActivo.id, fechaCierre);
     set({ turnoActivo: null, inventarioInicial: [], inventarioFinal: [] });
+  },
+
+  eliminarTurno: async (id) => {
+    await repo.eliminarTurno(id);
+    set({ historial: get().historial.filter((t) => t.id !== id) });
   },
 }));

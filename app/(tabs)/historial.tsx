@@ -1,6 +1,6 @@
 // app/(tabs)/historial.tsx
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
 import { Turno } from '../../src/domain/entities';
 
 export default function HistorialScreen() {
-  const { historial, cargarHistorial } = useTurnoStore();
+  const { historial, cargarHistorial, eliminarTurno } = useTurnoStore();
 
   useEffect(() => {
     cargarHistorial();
@@ -38,6 +38,21 @@ export default function HistorialScreen() {
     return horas > 0 ? `${horas}h ${minutos}m` : `${minutos}m`;
   };
 
+  const handleEliminar = (turno: Turno) => {
+    Alert.alert(
+      'Eliminar turno',
+      `¿Eliminar el turno del ${formatFecha(turno.fechaInicio)}? Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => eliminarTurno(turno.id),
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -57,50 +72,62 @@ export default function HistorialScreen() {
           />
         }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => {
-              router.push(`/turno/detalle?id=${item.id}`);
-            }}
-          >
-            <Card style={styles.turnoCard}>
-              <View style={styles.turnoHeader}>
-                <View style={styles.turnoFecha}>
-                  <Ionicons name="calendar-outline" size={16} color={palette.textMuted} />
-                  <Text style={styles.fechaText}>
-                    {formatFecha(item.fechaInicio)}
-                  </Text>
-                </View>
-                <View style={styles.turnoHeaderRight}>
-                  <Badge
-                    label={item.estado === 'activo' ? 'Activo' : 'Cerrado'}
-                    variant={item.estado === 'activo' ? 'success' : 'neutral'}
-                  />
+          <Card style={styles.turnoCard}>
+            <View style={styles.turnoHeader}>
+              <TouchableOpacity
+                style={styles.turnoFecha}
+                onPress={() => {
+                  router.push(`/turno/detalle?id=${item.id}`);
+                }}
+              >
+                <View style={[
+                  styles.estadoDot,
+                  { backgroundColor: item.estado === 'activo' ? palette.success : palette.textMuted }
+                ]} />
+                <Text style={styles.fechaText}>
+                  {formatFecha(item.fechaInicio)}
+                </Text>
+              </TouchableOpacity>
+              <View style={styles.turnoHeaderRight}>
+                <Badge
+                  label={item.estado === 'activo' ? 'Activo' : 'Cerrado'}
+                  variant={item.estado === 'activo' ? 'success' : 'neutral'}
+                />
+                <TouchableOpacity
+                  onPress={() => handleEliminar(item)}
+                  style={styles.deleteBtn}
+                >
+                  <Ionicons name="trash-outline" size={16} color={palette.danger} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => router.push(`/turno/detalle?id=${item.id}`)}
+                  style={styles.chevronBtn}
+                >
                   <Ionicons name="chevron-forward" size={16} color={palette.textMuted} />
-                </View>
+                </TouchableOpacity>
               </View>
+            </View>
 
-              <View style={styles.turnoDetalle}>
-                <View style={styles.detalleItem}>
-                  <Ionicons name="play-outline" size={14} color={palette.textMuted} />
-                  <Text style={styles.detalleLabel}>Inicio</Text>
-                  <Text style={styles.detalleValue}>{formatHora(item.fechaInicio)}</Text>
-                </View>
-                {item.fechaCierre && (
-                  <View style={styles.detalleItem}>
-                    <Ionicons name="stop-outline" size={14} color={palette.textMuted} />
-                    <Text style={styles.detalleLabel}>Cierre</Text>
-                    <Text style={styles.detalleValue}>{formatHora(item.fechaCierre)}</Text>
-                  </View>
-                )}
-                <View style={styles.detalleItem}>
-                  <Ionicons name="time-outline" size={14} color={palette.textMuted} />
-                  <Text style={styles.detalleLabel}>Duración</Text>
-                  <Text style={styles.detalleValue}>{getDuracion(item)}</Text>
-                </View>
+            <View style={styles.turnoDetalle}>
+              <View style={styles.detalleItem}>
+                <Ionicons name="play-outline" size={13} color={palette.textMuted} />
+                <Text style={styles.detalleLabel}>Inicio</Text>
+                <Text style={styles.detalleValue}>{formatHora(item.fechaInicio)}</Text>
               </View>
-            </Card>
-          </TouchableOpacity>
+              {item.fechaCierre && (
+                <View style={styles.detalleItem}>
+                  <Ionicons name="stop-outline" size={13} color={palette.textMuted} />
+                  <Text style={styles.detalleLabel}>Cierre</Text>
+                  <Text style={styles.detalleValue}>{formatHora(item.fechaCierre)}</Text>
+                </View>
+              )}
+              <View style={styles.detalleItem}>
+                <Ionicons name="time-outline" size={13} color={palette.textMuted} />
+                <Text style={styles.detalleLabel}>Duración</Text>
+                <Text style={styles.detalleValue}>{getDuracion(item)}</Text>
+              </View>
+            </View>
+          </Card>
         )}
       />
     </SafeAreaView>
@@ -176,5 +203,24 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: palette.textPrimary,
+  },
+  estadoDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.dangerDim,
+    borderRadius: borderRadius.sm,
+  },
+  chevronBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

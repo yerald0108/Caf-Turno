@@ -19,7 +19,7 @@ type Modo = 'existente' | 'nuevo';
 
 export default function EntradaModal() {
   const { turnoActivo, inventarioInicial, cargarInventarioInicial } = useTurnoStore();
-  const { agregarEntrada } = useMovimientosStore();
+  const { agregarEntrada, entradas, cargarMovimientos } = useMovimientosStore();
   const { productos, cargarProductos } = useProductoStore();
 
   const [modo, setModo] = useState<Modo>('existente');
@@ -34,6 +34,10 @@ export default function EntradaModal() {
   const [nuevoPrecio, setNuevoPrecio] = useState('');
   const [nuevaCategoria, setNuevaCategoria] = useState('');
   const [nuevaCantidadInicial, setNuevaCantidadInicial] = useState('');
+
+  useEffect(() => {
+    if (turnoActivo) cargarMovimientos(turnoActivo.id);
+  }, [turnoActivo]);
 
   useEffect(() => {
     cargarProductos();
@@ -302,6 +306,26 @@ export default function EntradaModal() {
           </>
         )}
 
+        {entradas.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>Entradas del turno</Text>
+            {entradas.map((e) => (
+              <Card key={e.id} style={styles.registradaCard}>
+                <View style={styles.registradaRow}>
+                  <Ionicons name="arrow-down-circle" size={18} color={palette.success} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.registradaNombre}>{e.productoNombre}</Text>
+                    <Text style={styles.registradaFecha}>
+                      {new Date(e.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                      {e.notas ? ` · ${e.notas}` : ''}
+                    </Text>
+                  </View>
+                  <Text style={styles.registradaCant}>+{e.cantidad}</Text>
+                </View>
+              </Card>
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -414,4 +438,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: palette.success,
   },
+  registradaFecha: {
+    fontSize: fontSize.xs,
+    color: palette.textMuted,
+    marginTop: 2,
+} ,
 });
