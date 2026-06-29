@@ -11,7 +11,6 @@ import { ScreenHeader, Card, Button, AnimatedNumber } from '../../src/ui/compone
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
 import { InventarioItem } from '../../src/domain/entities';
 import { calcularResumenTurno } from '../../src/domain/usecases/calcularResumenTurno';
-import { generateId } from '../../src/data/database/uuid';
 import { TurnoRepository } from '../../src/data/repositories';
 
 const repo = new TurnoRepository();
@@ -54,7 +53,7 @@ export default function CierreScreen() {
 
     // Guardar inventario final en la BD
     const itemsFinales: InventarioItem[] = inventarioInicial.map((item) => ({
-      id: generateId(),
+      id: `${turnoActivo.id}-${item.productoId}-final`,  // ← ID determinístico
       turnoId: turnoActivo.id,
       productoId: item.productoId,
       productoNombre: item.productoNombre,

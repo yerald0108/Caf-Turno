@@ -58,23 +58,27 @@ export default function EntradaModal() {
     }
 
     setSaving(true);
-    const entrada: EntradaProducto = {
-      id: generateId(),
-      turnoId: turnoActivo.id,
-      productoId: producto.id,
-      productoNombre: producto.nombre,
-      productoPrecio: producto.precio,
-      cantidad: cantNum,
-      fecha: new Date().toISOString(),
-      notas: notas.trim() || undefined,
-    };
-
-    await agregarEntrada(entrada);
-    setRegistradas((prev) => [entrada, ...prev]);
-    setProductoSeleccionado(null);
-    setCantidad('');
-    setNotas('');
-    setSaving(false);
+    try {
+      const entrada: EntradaProducto = {
+        id: generateId(),
+        turnoId: turnoActivo.id,
+        productoId: producto.id,
+        productoNombre: producto.nombre,
+        productoPrecio: producto.precio,
+        cantidad: cantNum,
+        fecha: new Date().toISOString(),
+        notas: notas.trim() || undefined,
+      };
+      await agregarEntrada(entrada);
+      setRegistradas((prev) => [entrada, ...prev]);
+      setProductoSeleccionado(null);
+      setCantidad('');
+      setNotas('');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo registrar la entrada. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleGuardarNuevo = async () => {
@@ -92,55 +96,55 @@ export default function EntradaModal() {
     const cantEntradaNum = parseFloat(cantidad) || 0;
 
     setSaving(true);
+    try {
+      const nuevoProducto: Producto = {
+        id: generateId(),
+        nombre: nuevoNombre.trim(),
+        precio: precioNum,
+        categoria: nuevaCategoria.trim() || undefined,
+      };
+      await productoRepo.guardar(nuevoProducto);
 
-    // Crear el producto en el catálogo
-    const nuevoProducto: Producto = {
-      id: generateId(),
-      nombre: nuevoNombre.trim(),
-      precio: precioNum,
-      categoria: nuevaCategoria.trim() || undefined,
-    };
-    await productoRepo.guardar(nuevoProducto);
-
-    // Agregarlo al inventario inicial del turno
-    const itemInicial: InventarioItem = {
-      id: generateId(),
-      turnoId: turnoActivo.id,
-      productoId: nuevoProducto.id,
-      productoNombre: nuevoProducto.nombre,
-      productoPrecio: nuevoProducto.precio,
-      cantidad: cantInicialNum,
-      tipo: 'inicial',
-    };
-    await turnoRepo.guardarInventarioItem(itemInicial);
-
-    // Si además entra cantidad ahora, registrar como entrada
-    if (cantEntradaNum > 0) {
-      const entrada: EntradaProducto = {
+      const itemInicial: InventarioItem = {
         id: generateId(),
         turnoId: turnoActivo.id,
         productoId: nuevoProducto.id,
         productoNombre: nuevoProducto.nombre,
         productoPrecio: nuevoProducto.precio,
-        cantidad: cantEntradaNum,
-        fecha: new Date().toISOString(),
-        notas: notas.trim() || undefined,
+        cantidad: cantInicialNum,
+        tipo: 'inicial',
       };
-      await agregarEntrada(entrada);
-      setRegistradas((prev) => [entrada, ...prev]);
+      await turnoRepo.guardarInventarioItem(itemInicial);
+
+      if (cantEntradaNum > 0) {
+        const entrada: EntradaProducto = {
+          id: generateId(),
+          turnoId: turnoActivo.id,
+          productoId: nuevoProducto.id,
+          productoNombre: nuevoProducto.nombre,
+          productoPrecio: nuevoProducto.precio,
+          cantidad: cantEntradaNum,
+          fecha: new Date().toISOString(),
+          notas: notas.trim() || undefined,
+        };
+        await agregarEntrada(entrada);
+        setRegistradas((prev) => [entrada, ...prev]);
+      }
+
+      await cargarInventarioInicial(turnoActivo.id);
+      await cargarProductos();
+
+      setNuevoNombre('');
+      setNuevoPrecio('');
+      setNuevaCategoria('');
+      setNuevaCantidadInicial('');
+      setCantidad('');
+      setNotas('');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo agregar el producto. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
     }
-
-    // Recargar inventario inicial en el store
-    await cargarInventarioInicial(turnoActivo.id);
-    await cargarProductos();
-
-    setNuevoNombre('');
-    setNuevoPrecio('');
-    setNuevaCategoria('');
-    setNuevaCantidadInicial('');
-    setCantidad('');
-    setNotas('');
-    setSaving(false);
   };
 
   return (

@@ -50,7 +50,7 @@ export function calcularResumenTurno(params: CalcularResumenParams): ResumenTurn
     const cantFinal = itemFinal?.cantidad ?? 0;
 
     const totalConsumido = Math.max(0, cantInicial + cantEntradas - cantFinal);
-    const cantidadVendida = Math.max(0, totalConsumido - cantSalidas - cantMermas);
+    const cantidadVendida = Math.max(0, totalConsumido - Math.min(cantSalidas + cantMermas, totalConsumido));
 
     // Verificar si hubo cambio de precio para este producto
     const cambio = cambiosPrecio.find((c) => c.productoId === productoId);

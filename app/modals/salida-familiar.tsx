@@ -66,26 +66,31 @@ export default function SalidaFamiliarModal() {
     }
 
     setSaving(true);
-    const items: SalidaFamiliarItem[] = itemsSeleccionados.map((i) => ({
-      productoId: i.productoId,
-      productoNombre: i.productoNombre,
+    try {
+      const items: SalidaFamiliarItem[] = itemsSeleccionados.map((i) => ({
+        productoId: i.productoId,
+        productoNombre: i.productoNombre,
         cantidad: i.cantidad,
-    }));
+      }));
 
-    const salida: SalidaFamiliar = {
-      id: generateId(),
-      turnoId: turnoActivo.id,
-      persona: persona.trim(),
-      items,
-      fecha: new Date().toISOString(),
-      notas: notas.trim() || undefined,
-    };
+      const salida: SalidaFamiliar = {
+        id: generateId(),
+        turnoId: turnoActivo.id,
+        persona: persona.trim(),
+        items,
+        fecha: new Date().toISOString(),
+        notas: notas.trim() || undefined,
+      };
 
-    await agregarSalidaFamiliar(salida);
-    setPersona('');
-    setItemsSeleccionados([]);
-    setNotas('');
-    setSaving(false);
+      await agregarSalidaFamiliar(salida);
+      setPersona('');
+      setItemsSeleccionados([]);
+      setNotas('');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo registrar la salida. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

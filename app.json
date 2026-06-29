@@ -24,6 +24,12 @@
     "scheme": "cafe-turno",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fa5b8385-90c9-4de6-8423-75e688bec272"
+      }
     }
   }
 }

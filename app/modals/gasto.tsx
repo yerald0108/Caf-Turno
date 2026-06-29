@@ -31,17 +31,22 @@ export default function GastoModal() {
     }
 
     setSaving(true);
-    const gasto: Gasto = {
-      id: generateId(),
-      turnoId: turnoActivo.id,
-      descripcion: descripcion.trim(),
-      monto: montoNum,
-      fecha: new Date().toISOString(),
-      notas: notas.trim() || undefined,
-    };
-
-    await agregarGasto(gasto);
-    router.back();
+    try {
+      const gasto: Gasto = {
+        id: generateId(),
+        turnoId: turnoActivo.id,
+        descripcion: descripcion.trim(),
+        monto: montoNum,
+        fecha: new Date().toISOString(),
+        notas: notas.trim() || undefined,
+      };
+      await agregarGasto(gasto);
+      router.back();
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo registrar el gasto. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const montoNum = parseFloat(monto) || 0;

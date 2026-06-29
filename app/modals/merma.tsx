@@ -55,23 +55,27 @@ export default function MermaModal() {
     }
 
     setSaving(true);
-    const merma: Merma = {
-      id: generateId(),
-      turnoId: turnoActivo.id,
-      productoId: producto.id,
-      productoNombre: producto.nombre,
-      cantidad: parseFloat(cantidad) || 0,
-      motivo,
-      descripcion: descripcion.trim() || undefined,
-      fecha: new Date().toISOString(),
-    };
-
-    await agregarMerma(merma);
-    setProductoSeleccionado(null);
-    setCantidad('1');
-    setMotivo(null);
-    setDescripcion('');
-    setSaving(false);
+    try {
+      const merma: Merma = {
+        id: generateId(),
+        turnoId: turnoActivo.id,
+        productoId: producto.id,
+        productoNombre: producto.nombre,
+        cantidad: parseFloat(cantidad) || 0,
+        motivo,
+        descripcion: descripcion.trim() || undefined,
+        fecha: new Date().toISOString(),
+      };
+      await agregarMerma(merma);
+      setProductoSeleccionado(null);
+      setCantidad('1');
+      setMotivo(null);
+      setDescripcion('');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo registrar la merma. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

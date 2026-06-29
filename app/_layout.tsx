@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { runMigrations } from '../src/data/database/migrations';
 import { palette } from '../src/ui/theme';
@@ -11,7 +12,14 @@ export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    runMigrations();
+    try {
+      runMigrations();
+    } catch (error) {
+      Alert.alert(
+        'Error de base de datos',
+        'No se pudo inicializar la aplicación. Reinicia e intenta de nuevo.',
+      );
+    }
   }, []);
 
   return (
