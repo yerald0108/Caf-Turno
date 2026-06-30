@@ -28,8 +28,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "fa5b8385-90c9-4de6-8423-75e688bec272"
+        "projectId": "9f6fdba5-aa8c-4b46-9dfc-795e40ad82b6"
       }
-    }
+    },
+    "owner": "yeraldagf"
   }
 }
