@@ -1,5 +1,5 @@
 // app/turno/cierre.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 } from 'react-native';
@@ -37,22 +37,52 @@ export default function CierreScreen() {
     cargarMovimientos(turnoActivo.id);
   }, [turnoActivo]);
 
-  useEffect(() => {
-    if (inventarioInicial.length > 0) {
-      const inicial: Record<string, string> = {};
-      inventarioInicial.forEach((item) => {
-        inicial[item.productoId] = '';
+  // Productos que participaron en el turno = inventario inicial + productos
+  // que llegaron por entradas pero no estaban en el inventario inicial
+  const productosDelTurno = useMemo(() => {
+    const mapa = new Map<string, { productoId: string; productoNombre: string; productoPrecio: number }>();
+
+    for (const item of inventarioInicial) {
+      mapa.set(item.productoId, {
+        productoId: item.productoId,
+        productoNombre: item.productoNombre,
+        productoPrecio: item.productoPrecio,
       });
-      setCantidadesFinales(inicial);
     }
-  }, [inventarioInicial]);
+
+    for (const entrada of entradas) {
+      if (!mapa.has(entrada.productoId)) {
+        mapa.set(entrada.productoId, {
+          productoId: entrada.productoId,
+          productoNombre: entrada.productoNombre,
+          productoPrecio: entrada.productoPrecio,
+        });
+      }
+    }
+
+    return Array.from(mapa.values());
+  }, [inventarioInicial, entradas]);
+
+  useEffect(() => {
+    if (productosDelTurno.length > 0) {
+      setCantidadesFinales((prev) => {
+        const nuevo: Record<string, string> = { ...prev };
+        for (const p of productosDelTurno) {
+          if (!(p.productoId in nuevo)) {
+            nuevo[p.productoId] = '';
+          }
+        }
+        return nuevo;
+      });
+    }
+  }, [productosDelTurno]);
 
   const handleCalcular = async () => {
     if (!turnoActivo) return;
 
 
     // Guardar inventario final en la BD
-    const itemsFinales: InventarioItem[] = inventarioInicial.map((item) => ({
+    const itemsFinales: InventarioItem[] = productosDelTurno.map((item) => ({
       id: `${turnoActivo.id}-${item.productoId}-final`,  // ← ID determinístico
       turnoId: turnoActivo.id,
       productoId: item.productoId,
@@ -134,12 +164,12 @@ export default function CierreScreen() {
 
           <Text style={styles.sectionLabel}>Inventario final</Text>
 
-          {inventarioInicial.map((item) => (
+          {productosDelTurno.map((item) => (
             <Card key={item.productoId} style={styles.itemCard}>
               <View style={styles.itemHeader}>
                 <Text style={styles.itemNombre}>{item.productoNombre}</Text>
                 <Text style={styles.itemInicial}>
-                  Inicial: {item.cantidad}
+                  Inicial: {inventarioInicial.find((i) => i.productoId === item.productoId)?.cantidad ?? 0}
                 </Text>
               </View>
               <View style={styles.cantidadRow}>

@@ -1,9 +1,10 @@
 // app/(tabs)/historial.tsx
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTurnoStore } from '../../src/store';
 import { Card, Badge, EmptyState } from '../../src/ui/components/common';
 import { palette, fontSize, spacing, borderRadius } from '../../src/ui/theme';
@@ -12,9 +13,11 @@ import { Turno } from '../../src/domain/entities';
 export default function HistorialScreen() {
   const { historial, cargarHistorial, eliminarTurno } = useTurnoStore();
 
-  useEffect(() => {
-    cargarHistorial();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      cargarHistorial();
+    }, [])
+  );
 
   const formatFecha = (iso: string) => {
     const d = new Date(iso);
@@ -39,9 +42,12 @@ export default function HistorialScreen() {
   };
 
   const handleEliminar = (turno: Turno) => {
+    const esActivo = turno.estado === 'activo';
     Alert.alert(
       'Eliminar turno',
-      `¿Eliminar el turno del ${formatFecha(turno.fechaInicio)}? Esta acción no se puede deshacer.`,
+      esActivo
+        ? '⚠️ Este turno está ACTIVO. Eliminarlo cerrará el turno sin guardar el resumen. ¿Continuar?'
+        : `¿Eliminar el turno del ${formatFecha(turno.fechaInicio)}? Esta acción no se puede deshacer.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {

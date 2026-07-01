@@ -30,20 +30,22 @@ export class MovimientosRepository implements IMovimientosRepository {
   async guardarSalidaFamiliar(salida: SalidaFamiliar): Promise<void> {
     const db = getDatabase();
 
-    db.runSync(
-      `INSERT INTO salidas_familiares (id, turnoId, persona, fecha, notas)
-       VALUES (?, ?, ?, ?, ?)`,
-      [salida.id, salida.turnoId, salida.persona, salida.fecha, salida.notas ?? null]
-    );
-
-    for (const item of salida.items) {
+    db.withTransactionSync(() => {
       db.runSync(
-        `INSERT INTO salidas_familiares_items
-         (id, salidaId, productoId, productoNombre, cantidad)
+        `INSERT INTO salidas_familiares (id, turnoId, persona, fecha, notas)
          VALUES (?, ?, ?, ?, ?)`,
-        [generateId(), salida.id, item.productoId, item.productoNombre, item.cantidad]
+        [salida.id, salida.turnoId, salida.persona, salida.fecha, salida.notas ?? null]
       );
-    }
+
+      for (const item of salida.items) {
+        db.runSync(
+          `INSERT INTO salidas_familiares_items
+          (id, salidaId, productoId, productoNombre, cantidad)
+          VALUES (?, ?, ?, ?, ?)`,
+          [generateId(), salida.id, item.productoId, item.productoNombre, item.cantidad]
+        );
+      }
+    });
   }
 
   async obtenerSalidasFamiliares(turnoId: string): Promise<SalidaFamiliar[]> {

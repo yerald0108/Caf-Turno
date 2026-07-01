@@ -68,13 +68,16 @@ export class TurnoRepository implements ITurnoRepository {
 
   async eliminarTurno(id: string): Promise<void> {
     const db = getDatabase();
-    db.runSync(`DELETE FROM inventario_items WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM entradas WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM salidas_familiares_items WHERE salidaId IN (SELECT id FROM salidas_familiares WHERE turnoId = ?)`, [id]);
-    db.runSync(`DELETE FROM salidas_familiares WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM gastos WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM mermas WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM cambios_precio WHERE turnoId = ?`, [id]);
-    db.runSync(`DELETE FROM turnos WHERE id = ?`, [id]);
+
+    db.withTransactionSync(() => {
+      db.runSync(`DELETE FROM inventario_items WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM entradas WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM salidas_familiares_items WHERE salidaId IN (SELECT id FROM salidas_familiares WHERE turnoId = ?)`, [id]);
+      db.runSync(`DELETE FROM salidas_familiares WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM gastos WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM mermas WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM cambios_precio WHERE turnoId = ?`, [id]);
+      db.runSync(`DELETE FROM turnos WHERE id = ?`, [id]);
+    });
   }
 }

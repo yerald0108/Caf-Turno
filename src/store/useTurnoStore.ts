@@ -76,11 +76,25 @@ export const useTurnoStore = create<TurnoState>((set, get) => ({
     if (!turnoActivo) return;
     const fechaCierre = new Date().toISOString();
     await repo.cerrarTurno(turnoActivo.id, fechaCierre);
-    set({ turnoActivo: null, inventarioInicial: [], inventarioFinal: [] });
+    const turnoCerrado = { ...turnoActivo, estado: 'cerrado' as const, fechaCierre };
+    set((state) => ({
+      turnoActivo: null,
+      inventarioInicial: [],
+      inventarioFinal: [],
+      historial: [turnoCerrado, ...state.historial.filter((t) => t.id !== turnoActivo.id)],
+    }));
   },
 
   eliminarTurno: async (id) => {
     await repo.eliminarTurno(id);
-    set({ historial: get().historial.filter((t) => t.id !== id) });
+    const eraActivo = get().turnoActivo?.id === id;
+    set({
+      historial: get().historial.filter((t) => t.id !== id),
+      ...(eraActivo && {
+        turnoActivo: null,
+        inventarioInicial: [],
+        inventarioFinal: [],
+      }),
+    });
   },
 }));
