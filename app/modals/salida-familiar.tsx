@@ -4,7 +4,6 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTurnoStore, useMovimientosStore, useProductoStore } from '../../src/store';
 import { ScreenHeader, Card, Button, AppTextInput } from '../../src/ui/components/common';

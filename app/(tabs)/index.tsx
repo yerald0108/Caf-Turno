@@ -263,15 +263,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing['2xl'],
     gap: spacing.md,
   },
-  emptyIconWrapper: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: palette.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
   emptyTitle: {
     fontSize: fontSize.xl,
     fontWeight: '700',
